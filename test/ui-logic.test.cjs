@@ -1,6 +1,7 @@
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs/promises'),path=require('node:path');
 const {classify,status}=require('../renderer/pricing.js');
 const {Store,DEFAULT_PROMPT,defaults}=require('../backend/core.cjs');
+test.before(()=>fs.mkdir(path.resolve(__dirname,'../work'),{recursive:true}));
 const at=(date,time)=>date+'T'+time+':00+08:00';
 test('DeepSeek correctly classifies all daily boundaries in Beijing time',()=>{
  for(const [time,peak] of [['08:59',false],['09:00',true],['11:59',true],['12:00',false],['13:59',false],['14:00',true],['17:59',true],['18:00',false]])
