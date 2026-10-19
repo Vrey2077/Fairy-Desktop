@@ -1,0 +1,24 @@
+{
+  "repository": "https://github.com/Chengzhibense/Fairy-DSH",
+  "retrieved": "2026-10-19",
+  "license": "Apache-2.0",
+  "files": [
+    {
+      "name": "mascot-geometry.js",
+      "blob": "637c1c63784a0af241e71a78d55308acbc271e19"
+    },
+    {
+      "name": "mascot-eye-svg.js",
+      "blob": "9536bc07799bdcbdbab451884bbe8c8c0ff42114"
+    },
+    {
+      "name": "mascot-effects-svg.js",
+      "blob": "214a846f425134338c4578b4b62f604414f2dedc"
+    },
+    {
+      "name": "mascot-style.js",
+      "blob": "ae9f3f778a7469d0a7c165e793a64d8409d18d1c"
+    }
+  ],
+  "modifications": "Source files retained unchanged. Panel uses generated SVG/CSS with an independent host adapter."
+}

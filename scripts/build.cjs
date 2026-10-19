@@ -1,0 +1,13 @@
+const fs=require('node:fs');const path=require('node:path');const root=path.resolve(__dirname,'..');
+const eye=require('../vendor/fairy-dsh/mascot-eye-svg.js');
+const {HALO_SVG,PULSE_SVG}=require('../vendor/fairy-dsh/mascot-effects-svg.js');
+const css=require('../vendor/fairy-dsh/mascot-style.js');
+fs.mkdirSync(path.join(root,'dist'),{recursive:true});
+const html=fs.readFileSync(path.join(root,'renderer/index.html'),'utf8').replace('<!--FAIRY-->',HALO_SVG+PULSE_SVG+eye);
+fs.writeFileSync(path.join(root,'dist/index.html'),html);
+fs.writeFileSync(path.join(root,'dist/style.css'),css+'\n'+fs.readFileSync(path.join(root,'renderer/style.css'),'utf8'));
+fs.copyFileSync(path.join(root,'renderer/app.js'),path.join(root,'dist/app.js'));
+for(const name of ['pricing.js','markdown.js','voice.js'])fs.copyFileSync(path.join(root,'renderer',name),path.join(root,'dist',name));
+for(const name of ['fairy.svg','fairy.png'])if(fs.existsSync(path.join(root,'assets',name)))fs.copyFileSync(path.join(root,'assets',name),path.join(root,'dist',name));
+for(const name of ['terminal-mark.svg','terminal-grid.svg'])fs.copyFileSync(path.join(root,'assets',name),path.join(root,'dist',name));
+console.log('Fairy Desktop UI built.');

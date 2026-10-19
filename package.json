@@ -1,0 +1,22 @@
+{
+  "name": "fairy-desktop",
+  "version": "0.3.1",
+  "description": "Fairy-inspired local desktop chat client with configurable APIs and speech",
+  "main": "electron/main.cjs",
+  "private": true,
+  "author": "Fairy Desktop Contributors",
+  "license": "Apache-2.0",
+  "scripts": {
+    "build": "node scripts/build.cjs",
+    "start": "electron .",
+    "preview": "node scripts/preview.cjs",
+    "test": "node --test test/*.test.cjs",
+    "package": "node scripts/package.cjs",
+    "audit": "node scripts/audit.cjs",
+    "check": "npm run build && npm test && npm run audit"
+  },
+  "devDependencies": {
+    "electron": "44.9.0",
+    "@electron/packager": "20.3.0"
+  }
+}

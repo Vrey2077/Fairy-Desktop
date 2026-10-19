@@ -1,0 +1,29 @@
+# Private runtime data and local credentials
+data/
+exports/
+work/
+release/
+dist/
+node_modules/
+.env
+.env.*
+!.env.example
+*.enc
+*.key
+*.pem
+*.pfx
+*.p12
+*.log
+*.tmp
+*.bak
+*.zip
+*.7z
+*.dmp
+state*.json
+desktop-runtime.json
+# Local-only media, screenshots and editor settings
+assets/downloaded/
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
