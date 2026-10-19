@@ -1,0 +1,80 @@
+name: One-time v0.3.1 release
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/publish-v0.3.1.yml']
+permissions:
+  contents: read
+concurrency:
+  group: one-time-v0.3.1-release
+  cancel-in-progress: false
+jobs:
+  publish:
+    if: github.repository == 'Vrey2077/Fairy-Desktop'
+    runs-on: windows-latest
+    timeout-minutes: 25
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: f43e31d9776872bcd467051c8dc25f6c71c4b4f9
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '24'
+          cache: npm
+      - name: Confirm audited source and release version
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          if ((git rev-parse HEAD) -ne 'f43e31d9776872bcd467051c8dc25f6c71c4b4f9') { throw 'Unexpected source revision' }
+          if ((Get-Content package.json -Raw | ConvertFrom-Json).version -ne '0.3.1') { throw 'Unexpected version' }
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - run: npm run check
+      - run: npm run package
+      - name: Audit packaged application
+        shell: pwsh
+        run: |
+          @'
+          const fs = require('node:fs'), path = require('node:path');
+          (async () => {
+            const asar = await import('@electron/asar');
+            const dest = path.resolve('work/release-audit');
+            asar.extractAll('release/Fairy-win32-x64/resources/app.asar', dest);
+            const files = [];
+            function walk(rel = '') {
+              for (const entry of fs.readdirSync(path.join(dest, rel), { withFileTypes: true })) {
+                const child = rel ? rel + '/' + entry.name : entry.name;
+                if (entry.isSymbolicLink()) throw Error('Unexpected symlink');
+                if (entry.isDirectory()) walk(child); else files.push(child);
+              }
+            }
+            walk();
+            const findings = require('./scripts/audit.cjs').audit(files, dest);
+            if (findings.length) throw Error(JSON.stringify(findings));
+            console.log(JSON.stringify({ packagedFiles: files.length, privacyAudit: 'passed' }));
+          })().catch(error => { console.error(error.message); process.exitCode = 1; });
+          '@ | node -
+          if ($LASTEXITCODE -ne 0) { throw 'Packaged application audit failed' }
+      - name: Create portable and source archives
+        shell: pwsh
+        run: ./scripts/release.ps1
+      - name: Publish this version only
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $assets = @(
+            'release/Fairy-Desktop-v0.3.1-source.zip',
+            'release/Fairy-Desktop-v0.3.1-win32-x64.zip',
+            'release/SHA256SUMS.txt'
+          )
+          foreach ($asset in $assets) {
+            if (-not (Test-Path -LiteralPath $asset -PathType Leaf)) { throw 'Missing release artifact' }
+          }
+          gh release create v0.3.1 @assets --repo $env:GITHUB_REPOSITORY --target f43e31d9776872bcd467051c8dc25f6c71c4b4f9 --title 'Fairy Desktop v0.3.1' --notes-file docs/RELEASE.md --draft
+          if ($LASTEXITCODE -ne 0) { throw 'Release creation or upload failed' }
+          gh release edit v0.3.1 --repo $env:GITHUB_REPOSITORY --draft=false --latest
+          if ($LASTEXITCODE -ne 0) { throw 'Release publication failed' }
